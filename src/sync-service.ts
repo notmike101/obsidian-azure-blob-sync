@@ -1,6 +1,6 @@
 import { BlobServiceClient, ContainerClient } from '@azure/storage-blob';
 import type { TFile, Vault } from 'obsidian';
-import { isFolder } from './utils';
+import { isFolder, doesFileOrFolderExist } from './utils';
 
 interface ISyncServiceOptions {
   accountName: string;
@@ -243,9 +243,7 @@ export class SyncService {
           console.log('[Azure Blob Sync] Checking if', pathFolder, 'exists');
         }
 
-        const doesPathExist = await this.#vault.adapter.exists(pathFolder);
-
-        if (doesPathExist) continue;
+        if (doesFileOrFolderExist(this.#vault, pathFolder)) continue;
 
         if (this.debug === true) {
           console.log('[Azure Blob Sync] Creating folder', pathFolder);
@@ -257,10 +255,8 @@ export class SyncService {
 
       if (!blobFileContent) continue;
 
-      const doesFileOrFolderExist = await this.#vault.adapter.exists(blobName);
-
-      if (doesFileOrFolderExist) {
-        const existingFile = await this.#vault.getAbstractFileByPath(blobName);
+      if (doesFileOrFolderExist(this.#vault, blobName)) {
+        const existingFile = this.#vault.getAbstractFileByPath(blobName);
 
         if (existingFile && isFolder(existingFile)) {
           if (this.debug === true) {
