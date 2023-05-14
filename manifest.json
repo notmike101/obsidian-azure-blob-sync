@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-azure-blob-sync",
 	"name": "Azure Blob Sync",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"minAppVersion": "0.15.0",
 	"description": "Sync notes to Azure Blob storage for Obsidian",
 	"author": "Mike Orozco",
