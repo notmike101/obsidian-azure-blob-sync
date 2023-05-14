@@ -55,7 +55,7 @@ jobs:
         run: mv dist/main.js main.js
 
       - name: Zip files
-        run: zip -r obsidian-azure-blob-sync-plugin.v${{ github.ref_name }}.zip main.js manifest.json
+        run: zip -r azure-blob-sync-plugin.v${{ github.ref_name }}.zip main.js manifest.json
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -63,4 +63,4 @@ jobs:
           files: |
             main.js
             manifest.json
-            obsidian-azure-blob-sync-plugin.v${{ github.ref_name }}.zip
+            azure-blob-sync-plugin.v${{ github.ref_name }}.zip
