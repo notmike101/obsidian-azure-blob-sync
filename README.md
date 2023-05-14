@@ -6,9 +6,12 @@ You **MUST** create a Share Access Token for your storage account. The length of
 
 You **MUST** configure the Resource sharing (CORS) options on your Azure Blob Storage account to allow the plugin to access the files.
 
-| Allowed origins | Allowed methods | Allowed headers | Exposed headers | Max age |
-| --------------- | --------------- | --------------- | -------------- | ------- |
-| app:obsidian.md | DELETE, GET, HEAD, MERGE, POST, OPTIONS, PUT | * | * | 0 |
+| Allowed origins  | Allowed methods | Allowed headers | Exposed headers | Max age |
+| ---------------- | --------------- | --------------- | -------------- | ------- |
+| app:obsidian.md  | DELETE, GET, HEAD, MERGE, POST, OPTIONS, PUT | * | | 0 |
+| http<no-link>://localhost | DELETE, GET, HEAD, MERGE, POST, OPTIONS, PUT | * | | 0 |
+
+**The first one is for the desktop application, the second is for mobile application. If you do not do these, the plugin will not work.**
 
 ## Configuration Options
 
