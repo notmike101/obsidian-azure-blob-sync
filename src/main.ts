@@ -10,6 +10,8 @@ interface ISettings {
   baseDirectory: string;
 	periodicSyncInterval: number;
 	debug: boolean;
+	syncOnStartup: boolean;
+	syncOnInterval: boolean;
 }
 
 const DEFAULT_SETTINGS: ISettings = {
@@ -19,7 +21,9 @@ const DEFAULT_SETTINGS: ISettings = {
 	baseDirectory: '',
 	periodicSyncInterval: 5,
 	debug: false,
-}
+	syncOnStartup: true,
+	syncOnInterval: true,
+};
 
 export default class AzureBlobSync extends Plugin {
 	settings: ISettings;
@@ -44,12 +48,16 @@ export default class AzureBlobSync extends Plugin {
 		});
 
 		await this.#syncService.initialize();
-		await this.#syncService.uploadAllFilesInVault();
-		await this.#syncService.downloadAllFilesInContainer();
 
-		this.#syncInterval = window.setInterval(this.manualSync, this.settings.periodicSyncInterval * 1000 * 60);
+		if (this.settings.syncOnStartup === true) {
+			await this.doSync();
+		}
 
-		this.registerInterval(this.#syncInterval);
+		if (this.settings.syncOnInterval === true) {
+			this.#syncInterval = window.setInterval(this.doSync, this.settings.periodicSyncInterval * 1000 * 60);
+
+			this.registerInterval(this.#syncInterval);
+		}
 	}
 
 	async onload() {
@@ -62,12 +70,12 @@ export default class AzureBlobSync extends Plugin {
 		this.registerEvent(this.app.vault.on('rename', this.#vaultRenameEventHandler.bind(this)));
 		this.registerEvent(this.app.vault.on('modify', this.#vaultModifyEventHandler.bind(this)));
 		this.registerEvent(this.app.vault.on('create', this.#vaultCreateEventHandler.bind(this)));
-		this.addRibbonIcon('refresh-cw', 'Force Sync With Azure Blob Storage', this.manualSync.bind(this));
+		this.addRibbonIcon('refresh-cw', 'Sync With Azure Blob Storage', this.doSync.bind(this));
 
 		this.addCommand({
 			id: 'sync',
-			name: 'Force Sync With Azure Blob Storage',
-			callback: this.manualSync.bind(this),
+			name: 'Sync With Azure Blob Storage',
+			callback: this.doSync.bind(this),
 		});
 
 		this.addCommand({
@@ -83,7 +91,7 @@ export default class AzureBlobSync extends Plugin {
 		});
 	}
 
-	async manualSync() {
+	async doSync() {
 		await this.#syncService.uploadAllFilesInVault();
 		await this.#syncService.downloadAllFilesInContainer();
 	}
@@ -123,9 +131,6 @@ export default class AzureBlobSync extends Plugin {
 	}
 
 	async saveSettings() {
-		const oldSettings = await this.loadData();
-		console.log(oldSettings, this.settings);
-
 		await this.saveData(this.settings);
 		await this.#setupSyncService();
 	}

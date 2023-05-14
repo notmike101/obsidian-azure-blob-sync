@@ -62,7 +62,7 @@ export class SettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('Container Name')
-      .setDesc('This is the name of the container in your Azure Blob Storage account where your Obsidian vault will be synced. Leave empty for root.')
+      .setDesc('This is the name of the container in your Azure Blob Storage account where your Obsidian vault will be synced.')
       .addText((text) => {
         return text
           .setPlaceholder('<ContainerName>')
@@ -75,8 +75,8 @@ export class SettingsTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName('Base Directory')
-      .setDesc('This is the base directory in your Azure Blob Storage account where your Obsidian vault will be synced.')
+      .setName('Remote Vault Path')
+      .setDesc('This is the directory in your storage container where your Obsidian vault will be synced. Leave this empty to use the root of the container.')
       .addText((text) => {
         return text
           .setPlaceholder('<BaseDirectory>')
@@ -103,14 +103,40 @@ export class SettingsTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName('Periodic Sync Interval')
+      .setName('Sync On Startup')
+      .setDesc('This will enable the plugin to sync your Obsidian vault with your Azure Blob Storage container on startup.')
+      .addToggle((toggle) => {
+        return toggle
+          .setValue(this.#plugin.settings.syncOnStartup)
+          .onChange(async (value) => {
+            this.#plugin.settings.syncOnStartup = value;
+
+            this.#enableSaveButton();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName('Sync On Interval')
+      .setDesc('This will enable the plugin to periodically sync your Obsidian vault with your Azure Blob Storage container.')
+      .addToggle((toggle) => {
+        return toggle
+          .setValue(this.#plugin.settings.syncOnInterval)
+          .onChange(async (value) => {
+            this.#plugin.settings.syncOnInterval = value;
+
+            this.#enableSaveButton();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName('Sync Interval')
       .setDesc('This is the interval in minutes at which the plugin will periodically sync your Obsidian vault with your Azure Blob Storage container. Minimum of every 5 minutes.')
       .addText((text) => {
         return text
-          .setPlaceholder('<PeriodicSyncInterval>')
+          .setPlaceholder('<SyncInterval>')
           .setValue(this.#plugin.settings.periodicSyncInterval.toString())
           .onChange(async (value) => {
-            const parsedValue = parseInt(value);
+            const parsedValue = parseFloat(value);
 
             if (isNaN(parsedValue)) {
               return;
