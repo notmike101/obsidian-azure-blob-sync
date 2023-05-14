@@ -187,6 +187,7 @@ export class SyncService {
       this.#logger.debug('Downloading latest version of', file.path, 'from the container');
 
       const blobFileContent = await this.downloadFile(file.path);
+
       await this.#vault.modify(file, blobFileContent ?? '');
 
       blobNames.delete(file.path);
@@ -197,7 +198,6 @@ export class SyncService {
     this.#logger.debug('Remaining untracked files in container', blobNames.keys());
 
     for (const blobName of blobNames.keys()) {
-      // Split the full blobName by the / character and filter out any empty strings
       const pathFolders = blobName.split('/').filter((pathFolder) => pathFolder !== '');
 
       for (let i = 0; i < pathFolders.length - 1; i++) {
@@ -205,11 +205,15 @@ export class SyncService {
 
         this.#logger.debug('Checking if', pathFolder, 'exists');
 
-        if (doesFileOrFolderExist(this.#vault, pathFolder)) continue;
+        if (doesFileOrFolderExist(this.#vault, pathFolder)) {
+          this.#logger.debug('Folder', pathFolder, 'already exists');
 
-        this.#logger.debug('Creating folder', pathFolder);
+          continue;
+        } else {
+          this.#logger.debug('Creating folder', pathFolder);
 
-        await this.#vault.createFolder(pathFolder);
+          await this.#vault.createFolder(pathFolder);
+        }
       }
 
       const blobFileContent = await this.downloadFile(blobName);
