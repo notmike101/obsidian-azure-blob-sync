@@ -101,7 +101,7 @@ export class SyncService {
 
       if (!downloadBlockBlobBody) throw new Error('Blob body is null');
 
-      const downloaded = await new Promise((resolve, reject) => {
+      const downloaded = await new Promise<string | ArrayBuffer | null | undefined>((resolve, reject) => {
         const fileReader = new FileReader();
 
         fileReader.addEventListener('loadend', (event: ProgressEvent<FileReader>) => {
