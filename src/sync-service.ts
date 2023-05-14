@@ -1,6 +1,7 @@
 import { BlobServiceClient, ContainerClient } from '@azure/storage-blob';
-import type { TFile, Vault } from 'obsidian';
 import { isFolder, doesFileOrFolderExist } from './utils';
+import { Logger, LogLevel } from './logger';
+import type { TFile, Vault } from 'obsidian';
 
 interface ISyncServiceOptions {
   accountName: string;
@@ -21,6 +22,7 @@ export class SyncService {
   #vault: Vault;
   debug: boolean;
   #isActive = false;
+  #logger: Logger;
 
   constructor(options: ISyncServiceOptions) {
     this.#baseDirectory = options.baseDirectory;
@@ -29,12 +31,11 @@ export class SyncService {
     this.#containerName = options.containerName;
     this.#vault = options.vault;
     this.debug = options.debug;
+    this.#logger = Logger.create('Azure Blob Sync', this.debug ? LogLevel.DEBUG : LogLevel.INFO);
 
-    if (this.debug === true) {
-      console.log('[Azure Blob Sync] Account Name is', this.#accountName);
-      console.log('[Azure Blob Sync] Container Name is', this.#containerName);
-      console.log('[Azure Blob Sync] Base Directory is', this.#baseDirectory);
-    }
+    this.#logger.debug('Account Name is', this.#accountName);
+    this.#logger.debug('Container Name is', this.#containerName);
+    this.#logger.debug('Base Directory is', this.#baseDirectory);
   }
 
   get isActive() {
@@ -52,13 +53,9 @@ export class SyncService {
 
       this.#isActive = true;
 
-      if (this.debug === true) {
-        console.log('[Azure Blob Sync] SyncService initialized');
-      }
+      this.#logger.info('SyncService initialized')
     } catch(err) {
-      if (this.debug === true) {
-        console.error('[Azure Blob Sync] Error initializing SyncService', err);
-      }
+      this.#logger.error('Error initializing SyncService', err);
     }
   }
 
@@ -68,21 +65,15 @@ export class SyncService {
 
       const { fileName, fileContent, fileLength } = file;
 
-      if (this.debug === true) {
-        console.log('[Azure Blob Sync] Uploading file', fileName);
-      }
+      this.#logger.debug('Uploading file', fileName);
 
       const blockBlobClient = this.#containerClient.getBlockBlobClient(`${this.#baseDirectory}${fileName}`);
 
       await blockBlobClient.upload(fileContent, fileLength);
 
-      if (this.debug === true) {
-        console.log('[Azure Blob Sync] Done uploading file', fileName);
-      }
+      this.#logger.debug('Done uploading file', fileName);
     } catch (err) {
-      if (this.debug === true) {
-        console.error('[Azure Blob Sync] Error uploading file', err);
-      }
+      this.#logger.error('Error uploading file', err);
     }
   }
 
@@ -90,9 +81,7 @@ export class SyncService {
     try {
       if (this.#isActive === false) return;
 
-      if (this.debug === true) {
-        console.log('[Azure Blob Sync] Renaming file', oldFileName, 'to', newFileName);
-      }
+      this.#logger.debug('Renaming file', oldFileName, 'to', newFileName);
 
       const blockBlobClient = this.#containerClient.getBlockBlobClient(`${this.#baseDirectory}${oldFileName}`);
       const newBlockBlobClient = this.#containerClient.getBlockBlobClient(`${this.#baseDirectory}${newFileName}`);
@@ -100,13 +89,9 @@ export class SyncService {
       await newBlockBlobClient.beginCopyFromURL(blockBlobClient.url);
       await blockBlobClient.delete();
 
-      if (this.debug === true) {
-        console.log('[Azure Blob Sync] Renamed file', oldFileName, 'to', newFileName);
-      }
+      this.#logger.debug('Done renaming file', oldFileName, 'to', newFileName);
     } catch (err) {
-      if (this.debug === true) {
-        console.error('[Azure Blob Sync] Error renaming file', err);
-      }
+      this.#logger.error('Error renaming file', err);
     }
   }
 
@@ -114,9 +99,7 @@ export class SyncService {
     try {
       if (this.#isActive === false) return;
 
-      if (this.debug === true) {
-        console.log('[Azure Blob Sync] Downloading file', fileName);
-      }
+      this.#logger.debug('Downloading file', fileName);
 
       const blockBlobClient = this.#containerClient.getBlockBlobClient(`${this.#baseDirectory}${fileName}`);
       const downloadBlockBlobResponse = await blockBlobClient.download();
@@ -136,15 +119,11 @@ export class SyncService {
         fileReader.readAsText(downloadBlockBlobBody);
       });
 
-      if (this.debug === true) {
-        console.log('[Azure Blob Sync] Downloaded file', fileName);
-      }
+      this.#logger.debug('Done downloading file', fileName);
 
       return downloaded?.toString();
     } catch (err) {
-      if (this.debug === true) {
-        console.error('[Azure Blob Sync] Error downloading file', err);
-      }
+      this.#logger.error('Error downloading file', err);
     }
   }
 
@@ -152,13 +131,15 @@ export class SyncService {
     try {
       if (this.#isActive === false) return;
 
+      this.#logger.debug('Deleting file', fileName);
+
       const blockBlobClient = this.#containerClient.getBlockBlobClient(`${this.#baseDirectory}${fileName}`);
 
       await blockBlobClient.delete();
+
+      this.#logger.debug('Done deleting file', fileName);
     } catch (err) {
-      if (this.debug === true) {
-        console.error('[Azure Blob Sync] Error deleting file', err);
-      }
+      this.#logger.error('Error deleting file', err);
     }
   }
 
@@ -167,18 +148,14 @@ export class SyncService {
 
     const vaultFiles = this.#vault.getMarkdownFiles();
 
-    if (this.debug === true) {
-      console.log('[Azure Blob Sync] Found', vaultFiles.length, 'files in vault', vaultFiles);
-    }
+    this.#logger.debug('Found', vaultFiles.length, 'files in vault', vaultFiles);
 
     for await (const file of vaultFiles) {
       const { path: fileName } = file;
       const fileContent = await this.#vault.cachedRead(file);
       const fileLength = fileContent.length;
 
-      if (this.debug === true) {
-        console.log('[Azure Blob Sync] Uploading file', fileName);
-      }
+      this.#logger.debug('Uploading file', fileName);
 
       await this.uploadFile({
         fileName,
@@ -186,14 +163,10 @@ export class SyncService {
         fileLength,
       });
 
-      if (this.debug === true) {
-        console.log('[Azure Blob Sync] Finished uploading file', fileName);
-      }
+      this.#logger.debug('Done uploading file', fileName);
     }
 
-    if (this.debug === true) {
-      console.log('[Azure Blob Sync] Finished uploading all files in vault');
-    }
+    this.#logger.debug('Finished uploading all files in vault');
   }
 
   async downloadAllFilesInContainer() {
@@ -207,30 +180,22 @@ export class SyncService {
       blobNames.add(blob.name.replace(this.#baseDirectory, ''));
     }
 
-    if (this.debug === true) {
-      console.log('[Azure Blob Sync] Found', blobNames.size, 'files in container', blobNames.keys());
-    }
+    this.#logger.debug('Found', blobNames.size, 'files in container', blobNames.keys());
 
     for (const file of vaultFiles) {
       if (!blobNames.has(file.path)) continue;
 
-      if (this.debug === true) {
-        console.log('[Azure Blob Sync] Downloading latest version of', file.path, 'from the container');
-      }
+      this.#logger.debug('Downloading latest version of', file.path, 'from the container');
 
       const blobFileContent = await this.downloadFile(file.path);
       await this.#vault.modify(file, blobFileContent ?? '');
 
       blobNames.delete(file.path);
 
-      if (this.debug === true) {
-        console.log('[Azure Blob Sync] Finished downloading latest version of', file.path, 'from the container');
-      }
+      this.#logger.debug('Finished downloading latest version of', file.path, 'from the container');
     }
 
-    if (this.debug === true) {
-      console.log('[Azure Blob Sync] Remaining untracked files in container', blobNames.keys());
-    }
+    this.#logger.debug('Remaining untracked files in container', blobNames.keys());
 
     for (const blobName of blobNames.keys()) {
       // Split the full blobName by the / character and filter out any empty strings
@@ -239,15 +204,12 @@ export class SyncService {
       for (let i = 0; i < pathFolders.length - 1; i++) {
         const pathFolder = pathFolders.slice(0, i + 1).join('/');
 
-        if (this.debug === true) {
-          console.log('[Azure Blob Sync] Checking if', pathFolder, 'exists');
-        }
+        this.#logger.debug('Checking if', pathFolder, 'exists');
 
         if (doesFileOrFolderExist(this.#vault, pathFolder)) continue;
 
-        if (this.debug === true) {
-          console.log('[Azure Blob Sync] Creating folder', pathFolder);
-        }
+        this.#logger.debug('Creating folder', pathFolder);
+
         await this.#vault.createFolder(pathFolder);
       }
 
@@ -259,29 +221,21 @@ export class SyncService {
         const existingFile = this.#vault.getAbstractFileByPath(blobName);
 
         if (existingFile && isFolder(existingFile)) {
-          if (this.debug === true) {
-            console.log('[Azure Blob Sync]', blobName, 'is a folder, skipping');
-          }
+          this.#logger.debug(blobName, 'is a folder, skipping');
 
           continue;
         }
 
-        if (this.debug === true) {
-          console.log('[Azure Blob Sync] Modifying file', blobName);
-        }
+        this.#logger.debug('Modifying file', blobName);
 
         await this.#vault.modify((existingFile as TFile), blobFileContent);
       } else {
-        if (this.debug === true) {
-          console.log('[Azure Blob Sync] Creating file', blobName);
-        }
+        this.#logger.debug('Creating file', blobName);
 
         await this.#vault.create(blobName, blobFileContent ?? '');
       }
     }
 
-    if (this.debug === true) {
-      console.log('[Azure Blob Sync] Finished downloading all files in container');
-    }
+    this.#logger.debug('Finished downloading all files in container');
   }
 }
