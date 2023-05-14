@@ -13,6 +13,17 @@ if you want to view the source, please visit the github repository of this plugi
 
 const prod = (process.argv[2] === "production");
 
+const plugins = [
+	copyStaticFiles({
+		src: './manifest.json',
+		dest: './dist/manifest.json',
+	}),
+];
+
+if (prod) {
+	plugins.push(cleanPlugin());
+}
+
 const context = await esbuild.context({
 	banner: {
 		js: banner,
@@ -43,13 +54,7 @@ const context = await esbuild.context({
 	treeShaking: true,
 	outdir: './dist',
 	metafile: true,
-	plugins: [
-		cleanPlugin(),
-		copyStaticFiles({
-			src: './manifest.json',
-			dest: './dist/manifest.json',
-		}),
-	],
+	plugins,
 });
 
 if (prod) {
