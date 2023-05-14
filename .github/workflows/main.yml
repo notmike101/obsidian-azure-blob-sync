@@ -28,8 +28,28 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Zip release
-        run: zip -r obsidian-azure-blob-sync-plugin.zip ./dist/main.js ./manifest.json
+      - name: Save artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: distribution-files
+          retention-days: 1
+          path: |
+            dist/main.js
+            manifest.json
+
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: distribution-files
+
+      - name: Zip files
+        run: zip -r obsidian-azure-blob-sync-plugin.v${{ github.ref_name }}.zip ./dist/main.js ./manifest.json
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -37,4 +57,4 @@ jobs:
           files: |
             dist/main.js
             manifest.json
-            obsidian-azure-blob-sync-plugin.zip
+            obsidian-azure-blob-sync-plugin.v${{ github.ref_name }}.zip
