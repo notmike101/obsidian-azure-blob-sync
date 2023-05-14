@@ -1,26 +1,54 @@
 # Obsidian Azure Blob Sync
 
-You **MUST** create a container (If one does not already exist) in your Azure Blob Storage account before using this plugin.
+## Prerequesites
 
-You **MUST** create a Share Access Token for your storage account. The length of time the token is valid for is up to you. The plugin will use this token to access your storage account. You can revoke the token at any time. For simplicity, I recommend creating a token that never expires with every permission available. You can always revoke the token later if you need to.
+* An existing Azure Blob Storage account
+* A container in the storage account to store the files
+* A Shared Access Signature Token (SAS) for the storage account
+* A properly configured CORS policy for the storage account (See #cors-policy)
 
-You **MUST** configure the Resource sharing (CORS) options on your Azure Blob Storage account to allow the plugin to access the files.
+## A Shared Access Token!? What the heck?
+
+We need a shared access token only because the NPM package [@azure/storage-blob](https://www.npmjs.com/package/@azure/storage-blob) does not play well with Electron, which prevents us from properly authorizing an application to access the storage account.
+
+Your Shared Access Signature Token stays on your machine and is never sent anywhere except Microsoft's REST API to interface with the storage account.
+
+The length of time the token is valid for and the permissions it has it up to you, but I recommend creating a token that expires in an absurdly long time with every permission available.
+
+
+## CORS Policy
+
+You **MUST** configure the Resource sharing (CORS) options on your Azure Blob Storage account to allow the plugin to access the files inside of the container. Without this, the plugin will not work either on desktop or mobile, whichever platform you choose to ignore.
+
+To configure these, log into the Azure portal and open your storage account settings. Find the "Resource sharing (CORS)" area, then add the following fields:
 
 | Allowed origins  | Allowed methods | Allowed headers | Exposed headers | Max age |
 | ---------------- | --------------- | --------------- | -------------- | ------- |
 | app:obsidian.md  | DELETE, GET, HEAD, MERGE, POST, OPTIONS, PUT | * | | 0 |
 | http<no-link>://localhost | DELETE, GET, HEAD, MERGE, POST, OPTIONS, PUT | * | | 0 |
 
-**The first one is for the desktop application, the second is for mobile application. If you do not do these, the plugin will not work.**
+**The first one is for the desktop application, the second is for mobile application.**
 
-## Configuration Options
+**BE SURE TO SAVE**
 
-**Account Name**: The name of your Azure Storage Account.
+## Configuration
 
-**Shared Access Signature Token**: The **QUERY STRING** portion of the SAS token. This is the part of the token that starts with `?sv=`. The plugin will append the rest of the token to the end of this string.
+When first loading the application, you will need to configure all available settings in the plugin settings area. These settings are:
 
-**Container Name**: The name of the container in your Azure Storage Account.
+| Setting | Description |
+| ------- | ----------- |
+| Storage Account Name | The name of the storage account you are using |
+| Container Name | The name of the container you are using |
+| Shared Access Signature Token | The token you created to access the storage account |
+| Remote Vault Path | The path to the vault inside of the container |
+| Sync on Startup | Whether or not to sync on startup |
+| Sync on Interval | Whether or not to sync on the interval |
+| Sync Interval | How often the plugin should check for changes to sync |
 
-**Base Directory**: The base directory in your container to store your files. This is optional. If you do not specify a base directory, the plugin will store your files in the root of your container.
+**NOTICE: YOU MUST PRESS THE SAVE BUTTON FOR THE SETTINGS TO BE SAVED. NEGLECTING TO DO THIS WILL RESULT IN YOUR CONFIGURATION BEING LOST.**
 
-**Debug**: Enable console output for debugging purposes.
+This is done to prevent the plugin from saving and using invalid configuration data.
+
+## Usage
+
+Once you have configured the plugin, you can use it like any other sync plugin. The plugin will automatically sync on startup and on the interval you have configured. You can also manually sync by clicking the "Sync" button in the ribbon area or various commands.
