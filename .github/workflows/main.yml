@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
@@ -27,6 +29,9 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+      - name: Directory Listing
+        run: ls -Ral
 
       - name: Save artifacts
         uses: actions/upload-artifact@v3
@@ -48,6 +53,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: distribution-files
+
+      - name: Directory Listing
+        run: ls -Ral
 
       - name: Zip files
         run: zip -r obsidian-azure-blob-sync-plugin.v${{ github.ref_name }}.zip ./dist/main.js ./manifest.json
