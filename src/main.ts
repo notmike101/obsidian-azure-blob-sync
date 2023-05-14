@@ -62,6 +62,30 @@ export default class AzureBlobSync extends Plugin {
 		this.registerEvent(this.app.vault.on('rename', this.#vaultRenameEventHandler.bind(this)));
 		this.registerEvent(this.app.vault.on('modify', this.#vaultModifyEventHandler.bind(this)));
 		this.registerEvent(this.app.vault.on('create', this.#vaultCreateEventHandler.bind(this)));
+		this.addRibbonIcon('refresh-cw', 'Force Sync With Azure Blob Storage', this.#manualSync.bind(this));
+
+		this.addCommand({
+			id: 'sync',
+			name: 'Force Sync With Azure Blob Storage',
+			callback: this.#manualSync.bind(this),
+		});
+
+		this.addCommand({
+			id: 'upload',
+			name: 'Upload All Files To Azure Blob Storage',
+			callback: this.#syncService.uploadAllFilesInVault.bind(this.#syncService),
+		});
+
+		this.addCommand({
+			id: 'download',
+			name: 'Download All Files From Azure Blob Storage',
+			callback: this.#syncService.downloadAllFilesInContainer.bind(this.#syncService),
+		});
+	}
+
+	async #manualSync() {
+		await this.#syncService.uploadAllFilesInVault();
+		await this.#syncService.downloadAllFilesInContainer();
 	}
 
 	#vaultDeleteEventHandler(fileOrFolder: TAbstractFile) {
