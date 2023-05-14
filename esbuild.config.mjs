@@ -1,5 +1,4 @@
 import esbuild from "esbuild";
-import copyStaticFiles from 'esbuild-copy-static-files';
 import process from "process";
 import builtins from "builtin-modules";
 
@@ -40,14 +39,6 @@ const context = await esbuild.context({
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
 	outfile: "./dist/main.js",
-	plugins: [
-		copyStaticFiles({
-			src: './static',
-			dest: './dist',
-			recursive: true,
-			preserveTimestamps: true,
-		}),
-	],
 });
 
 if (prod) {
