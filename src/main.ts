@@ -8,6 +8,7 @@ interface ISettings {
   sasToken: string;
   containerName: string;
   baseDirectory: string;
+	periodicSyncInterval: number;
 	debug: boolean;
 }
 
@@ -16,16 +17,22 @@ const DEFAULT_SETTINGS: ISettings = {
 	sasToken: '',
 	containerName: '',
 	baseDirectory: '',
+	periodicSyncInterval: 5,
 	debug: false,
 }
 
 export default class AzureBlobSync extends Plugin {
 	settings: ISettings;
 	#syncService: SyncService;
+	#syncInterval: number | undefined;
 
 	async #setupSyncService() {
 		const { accountName, sasToken, containerName, baseDirectory, debug } = this.settings;
 		const { vault } = this.app;
+
+		if (this.#syncInterval) {
+			window.clearInterval(this.#syncInterval);
+		}
 
 		this.#syncService = new SyncService({
 			accountName,
@@ -39,6 +46,10 @@ export default class AzureBlobSync extends Plugin {
 		await this.#syncService.initialize();
 		await this.#syncService.uploadAllFilesInVault();
 		await this.#syncService.downloadAllFilesInContainer();
+
+		this.#syncInterval = window.setInterval(this.#manualSync, this.settings.periodicSyncInterval * 1000 * 60);
+
+		this.registerInterval(this.#syncInterval);
 	}
 
 	async onload() {

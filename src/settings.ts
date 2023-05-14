@@ -103,6 +103,30 @@ export class SettingsTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
+      .setName('Periodic Sync Interval')
+      .setDesc('This is the interval in minutes at which the plugin will periodically sync your Obsidian vault with your Azure Blob Storage container. Minimum of every 5 minutes.')
+      .addText((text) => {
+        return text
+          .setPlaceholder('<PeriodicSyncInterval>')
+          .setValue(this.#plugin.settings.periodicSyncInterval.toString())
+          .onChange(async (value) => {
+            const parsedValue = parseInt(value);
+
+            if (isNaN(parsedValue)) {
+              return;
+            }
+
+            if (parsedValue < 5) {
+              return;
+            }
+
+            this.#plugin.settings.periodicSyncInterval = parsedValue;
+
+            this.#enableSaveButton();
+          });
+      });
+
+    new Setting(containerEl)
       .setName('Debug')
       .setDesc('This will enable debug logging for the plugin.')
       .addToggle((toggle) => {
