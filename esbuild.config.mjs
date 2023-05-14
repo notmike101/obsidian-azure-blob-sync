@@ -2,6 +2,7 @@ import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
 import { cleanPlugin } from 'esbuild-clean-plugin';
+import copyStaticFiles from 'esbuild-copy-static-files';
 
 const banner =
 `/*
@@ -44,6 +45,10 @@ const context = await esbuild.context({
 	metafile: true,
 	plugins: [
 		cleanPlugin(),
+		copyStaticFiles({
+			src: './manifest.json',
+			dest: './dist/manifest.json',
+		}),
 	],
 });
 
