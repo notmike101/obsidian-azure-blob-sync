@@ -56,7 +56,7 @@ export default class AzureBlobSync extends Plugin {
 		}
 
 		if (this.settings.syncOnInterval === true) {
-			this.#syncInterval = window.setInterval(this.doSync, this.settings.periodicSyncInterval * 1000 * 60);
+			this.#syncInterval = window.setInterval(this.doSync.bind(this), this.settings.periodicSyncInterval * 1000 * 60);
 
 			this.registerInterval(this.#syncInterval);
 		}
@@ -86,13 +86,13 @@ export default class AzureBlobSync extends Plugin {
 		this.addCommand({
 			id: 'upload',
 			name: 'Upload All Files To Azure Blob Storage',
-			callback: this.#syncService.uploadAllFilesInVault.bind(this.#syncService),
+			callback: this.#syncService.uploadAllFilesInVault.bind(this),
 		});
 
 		this.addCommand({
 			id: 'download',
 			name: 'Download All Files From Azure Blob Storage',
-			callback: this.#syncService.downloadAllFilesInContainer.bind(this.#syncService),
+			callback: this.#syncService.downloadAllFilesInContainer.bind(this),
 		});
 	}
 
