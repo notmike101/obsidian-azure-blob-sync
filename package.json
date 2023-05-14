@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-azure-blob-sync-plugin",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"description": "Allows sync of vault to Azure Blob Storage",
 	"main": "main.js",
 	"scripts": {
