@@ -47,7 +47,7 @@ export default class AzureBlobSync extends Plugin {
 		await this.#syncService.uploadAllFilesInVault();
 		await this.#syncService.downloadAllFilesInContainer();
 
-		this.#syncInterval = window.setInterval(this.#manualSync, this.settings.periodicSyncInterval * 1000 * 60);
+		this.#syncInterval = window.setInterval(this.manualSync, this.settings.periodicSyncInterval * 1000 * 60);
 
 		this.registerInterval(this.#syncInterval);
 	}
@@ -62,12 +62,12 @@ export default class AzureBlobSync extends Plugin {
 		this.registerEvent(this.app.vault.on('rename', this.#vaultRenameEventHandler.bind(this)));
 		this.registerEvent(this.app.vault.on('modify', this.#vaultModifyEventHandler.bind(this)));
 		this.registerEvent(this.app.vault.on('create', this.#vaultCreateEventHandler.bind(this)));
-		this.addRibbonIcon('refresh-cw', 'Force Sync With Azure Blob Storage', this.#manualSync.bind(this));
+		this.addRibbonIcon('refresh-cw', 'Force Sync With Azure Blob Storage', this.manualSync.bind(this));
 
 		this.addCommand({
 			id: 'sync',
 			name: 'Force Sync With Azure Blob Storage',
-			callback: this.#manualSync.bind(this),
+			callback: this.manualSync.bind(this),
 		});
 
 		this.addCommand({
@@ -83,7 +83,7 @@ export default class AzureBlobSync extends Plugin {
 		});
 	}
 
-	async #manualSync() {
+	async manualSync() {
 		await this.#syncService.uploadAllFilesInVault();
 		await this.#syncService.downloadAllFilesInContainer();
 	}
