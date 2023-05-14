@@ -1,6 +1,7 @@
 import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
+import { cleanPlugin } from 'esbuild-clean-plugin';
 
 const banner =
 `/*
@@ -39,7 +40,11 @@ const context = await esbuild.context({
 	logLevel: "info",
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
-	outfile: "./dist/main.js",
+	outdir: './dist',
+	metafile: true,
+	plugins: [
+		cleanPlugin(),
+	],
 });
 
 if (prod) {
