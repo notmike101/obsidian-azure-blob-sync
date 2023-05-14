@@ -30,9 +30,6 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Directory Listing
-        run: ls -Ral
-
       - name: Save artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -54,16 +51,16 @@ jobs:
         with:
           name: distribution-files
 
-      - name: Directory Listing
-        run: ls -Ral
+      - name: Move main.js to root
+        run: mv dist/main.js main.js
 
       - name: Zip files
-        run: zip -r obsidian-azure-blob-sync-plugin.v${{ github.ref_name }}.zip ./dist/main.js ./manifest.json
+        run: zip -r obsidian-azure-blob-sync-plugin.v${{ github.ref_name }}.zip main.js manifest.json
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            dist/main.js
+            main.js
             manifest.json
             obsidian-azure-blob-sync-plugin.v${{ github.ref_name }}.zip
