@@ -31,9 +31,7 @@ export class SyncService {
     this.debug = options.debug;
 
     if (this.debug === true) {
-      console.log('[Azure Blob Sync] SyncService initialized');
       console.log('[Azure Blob Sync] Account Name is', this.#accountName);
-      console.log('[Azure Blob Sync] SAS Token is', this.#sasToken);
       console.log('[Azure Blob Sync] Container Name is', this.#containerName);
       console.log('[Azure Blob Sync] Base Directory is', this.#baseDirectory);
     }
@@ -53,6 +51,10 @@ export class SyncService {
       this.#containerClient = this.#service.getContainerClient(this.#containerName);
 
       this.#isActive = true;
+
+      if (this.debug === true) {
+        console.log('[Azure Blob Sync] SyncService initialized');
+      }
     } catch(err) {
       if (this.debug === true) {
         console.error('[Azure Blob Sync] Error initializing SyncService', err);
@@ -65,9 +67,18 @@ export class SyncService {
       if (this.#isActive === false) return;
 
       const { fileName, fileContent, fileLength } = file;
+
+      if (this.debug === true) {
+        console.log('[Azure Blob Sync] Uploading file', fileName);
+      }
+
       const blockBlobClient = this.#containerClient.getBlockBlobClient(`${this.#baseDirectory}${fileName}`);
 
       await blockBlobClient.upload(fileContent, fileLength);
+
+      if (this.debug === true) {
+        console.log('[Azure Blob Sync] Done uploading file', fileName);
+      }
     } catch (err) {
       if (this.debug === true) {
         console.error('[Azure Blob Sync] Error uploading file', err);
@@ -79,11 +90,19 @@ export class SyncService {
     try {
       if (this.#isActive === false) return;
 
+      if (this.debug === true) {
+        console.log('[Azure Blob Sync] Renaming file', oldFileName, 'to', newFileName);
+      }
+
       const blockBlobClient = this.#containerClient.getBlockBlobClient(`${this.#baseDirectory}${oldFileName}`);
       const newBlockBlobClient = this.#containerClient.getBlockBlobClient(`${this.#baseDirectory}${newFileName}`);
 
       await newBlockBlobClient.beginCopyFromURL(blockBlobClient.url);
       await blockBlobClient.delete();
+
+      if (this.debug === true) {
+        console.log('[Azure Blob Sync] Renamed file', oldFileName, 'to', newFileName);
+      }
     } catch (err) {
       if (this.debug === true) {
         console.error('[Azure Blob Sync] Error renaming file', err);
@@ -94,6 +113,10 @@ export class SyncService {
   async downloadFile(fileName: string) {
     try {
       if (this.#isActive === false) return;
+
+      if (this.debug === true) {
+        console.log('[Azure Blob Sync] Downloading file', fileName);
+      }
 
       const blockBlobClient = this.#containerClient.getBlockBlobClient(`${this.#baseDirectory}${fileName}`);
       const downloadBlockBlobResponse = await blockBlobClient.download();
@@ -112,6 +135,10 @@ export class SyncService {
 
         fileReader.readAsText(downloadBlockBlobBody);
       });
+
+      if (this.debug === true) {
+        console.log('[Azure Blob Sync] Downloaded file', fileName);
+      }
 
       return downloaded?.toString();
     } catch (err) {
