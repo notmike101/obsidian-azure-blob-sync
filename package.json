@@ -1,0 +1,33 @@
+{
+	"name": "obsidian-azure-blob-sync-plugin",
+	"version": "1.0.0",
+	"description": "Allows sync of vault to Azure Blob Storage",
+	"main": "main.js",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"version": "node version-bump.mjs && git add manifest.json versions.json"
+	},
+	"keywords": [],
+	"author": "Mike Orozco <me@mikeorozco.dev> (https://mikeorozco.dev)",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/node": "^16.11.6",
+		"@typescript-eslint/eslint-plugin": "5.29.0",
+		"@typescript-eslint/parser": "5.29.0",
+		"builtin-modules": "3.3.0",
+		"esbuild": "0.17.3",
+		"esbuild-copy-static-files": "^0.1.0",
+		"obsidian": "latest",
+		"tslib": "2.4.0",
+		"typescript": "4.7.4"
+	},
+	"dependencies": {
+		"@azure/storage-blob": "^12.14.0"
+	},
+	"pnpm": {
+		"patchedDependencies": {
+			"@azure/core-http@3.0.1": "patches/@azure__core-http@3.0.1.patch"
+		}
+	}
+}

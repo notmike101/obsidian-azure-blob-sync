@@ -1,0 +1,56 @@
+diff --git a/dist/index.js b/dist/index.js
+index e7bd31ae625b56e1e6434a30eba3fcb0ff82ea83..d8e132b04177b27b91289f1d39b3763d368d3891 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -315,10 +315,8 @@ const validUuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F
+ /**
+  * A constant that indicates whether the environment is node.js or browser based.
+  */
+-const isNode = typeof process !== "undefined" &&
+-    !!process.version &&
+-    !!process.versions &&
+-    !!process.versions.node;
++const isNode = false;
++
+ /**
+  * Encodes an URI.
+  *
+@@ -5045,7 +5043,7 @@ function createPipelineFromOptions(pipelineOptions, authPolicyFactory) {
+     }
+     requestPolicyFactories.push(logPolicy(loggingOptions));
+     if (isNode && pipelineOptions.decompressResponse === false) {
+-        requestPolicyFactories.push(disableResponseDecompressionPolicy());
++        // requestPolicyFactories.push(disableResponseDecompressionPolicy());
+     }
+     return {
+         httpClient: pipelineOptions.httpClient,
+diff --git a/dist-esm/src/serviceClient.js b/dist-esm/src/serviceClient.js
+index b817630bf4285b1af76146d35d1fadf17c71ab32..fb11b20e9ad64b1dc4d2863c91d7f58bb5d76990 100644
+--- a/dist-esm/src/serviceClient.js
++++ b/dist-esm/src/serviceClient.js
+@@ -462,7 +462,7 @@ export function createPipelineFromOptions(pipelineOptions, authPolicyFactory) {
+     }
+     requestPolicyFactories.push(logPolicy(loggingOptions));
+     if (isNode && pipelineOptions.decompressResponse === false) {
+-        requestPolicyFactories.push(disableResponseDecompressionPolicy());
++        // requestPolicyFactories.push(disableResponseDecompressionPolicy());
+     }
+     return {
+         httpClient: pipelineOptions.httpClient,
+diff --git a/dist-esm/src/util/utils.js b/dist-esm/src/util/utils.js
+index 407e56c34bbcd7a51a2cedbd1f478003ea18c479..7dcbaa8764ea3848f08c08f9ce60e75ffa963a22 100644
+--- a/dist-esm/src/util/utils.js
++++ b/dist-esm/src/util/utils.js
+@@ -7,10 +7,8 @@ const validUuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F
+ /**
+  * A constant that indicates whether the environment is node.js or browser based.
+  */
+-export const isNode = typeof process !== "undefined" &&
+-    !!process.version &&
+-    !!process.versions &&
+-    !!process.versions.node;
++export const isNode = false;
++
+ /**
+  * Checks if a parsed URL is HTTPS
+  *
