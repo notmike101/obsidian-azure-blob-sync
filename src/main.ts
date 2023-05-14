@@ -2,6 +2,7 @@ import { Plugin, TAbstractFile, TFile } from 'obsidian';
 import { SettingsTab } from './settings';
 import { SyncService } from './sync-service';
 import { isFile } from './utils';
+import { Logger, LogLevel } from './logger';
 
 interface ISettings {
 	accountName: string;
@@ -29,6 +30,7 @@ export default class AzureBlobSync extends Plugin {
 	settings: ISettings;
 	#syncService: SyncService;
 	#syncInterval: number | undefined;
+	#logger: Logger;
 
 	async #setupSyncService() {
 		const { accountName, sasToken, containerName, baseDirectory, debug } = this.settings;
@@ -62,6 +64,9 @@ export default class AzureBlobSync extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+
+		this.#logger = Logger.create('Azure Blob Sync', this.settings.debug ? LogLevel.DEBUG : LogLevel.INFO);
+
 		await this.#setupSyncService();
 
 		this.addSettingTab(new SettingsTab(this.app, this));
@@ -92,8 +97,12 @@ export default class AzureBlobSync extends Plugin {
 	}
 
 	async doSync() {
+		this.#logger.debug('Started sync');
+
 		await this.#syncService.uploadAllFilesInVault();
 		await this.#syncService.downloadAllFilesInContainer();
+
+		this.#logger.debug('Finished sync');
 	}
 
 	#vaultDeleteEventHandler(fileOrFolder: TAbstractFile) {
