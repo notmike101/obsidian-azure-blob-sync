@@ -64,10 +64,9 @@ export class SyncService {
       if (this.#isActive === false) return;
 
       const { fileName, fileContent, fileLength } = file;
+      const blockBlobClient = this.#containerClient.getBlockBlobClient(`${this.#baseDirectory}${fileName}`);
 
       this.#logger.debug('Uploading file', fileName);
-
-      const blockBlobClient = this.#containerClient.getBlockBlobClient(`${this.#baseDirectory}${fileName}`);
 
       await blockBlobClient.upload(fileContent, fileLength);
 
