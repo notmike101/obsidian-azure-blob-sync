@@ -28,19 +28,19 @@ const DEFAULT_SETTINGS: ISettings = {
 
 export default class AzureBlobSync extends Plugin {
 	settings: ISettings;
-	#syncService: SyncService;
-	#syncInterval: number | undefined;
-	#logger: Logger;
+	syncService: SyncService;
+	syncInterval: number | undefined;
+	logger: Logger;
 
 	async #setupSyncService() {
 		const { accountName, sasToken, containerName, baseDirectory, debug } = this.settings;
 		const { vault } = this.app;
 
-		if (this.#syncInterval) {
-			window.clearInterval(this.#syncInterval);
+		if (this.syncInterval) {
+			window.clearInterval(this.syncInterval);
 		}
 
-		this.#syncService = new SyncService({
+		this.syncService = new SyncService({
 			accountName,
 			sasToken,
 			containerName,
@@ -49,74 +49,79 @@ export default class AzureBlobSync extends Plugin {
 			debug,
 		});
 
-		await this.#syncService.initialize();
+		await this.syncService.initialize();
 
 		if (this.settings.syncOnStartup === true) {
-			await this.doSync();
+			await this.doFullSync();
 		}
 
 		if (this.settings.syncOnInterval === true) {
-			this.#syncInterval = window.setInterval(this.doSync.bind(this), this.settings.periodicSyncInterval * 1000 * 60);
+			this.syncInterval = window.setInterval(this.doFullSync.bind(this), this.settings.periodicSyncInterval * 1000 * 60);
 
-			this.registerInterval(this.#syncInterval);
+			this.registerInterval(this.syncInterval);
 		}
 	}
 
-	async onload() {
-		await this.loadSettings();
-
-		this.#logger = Logger.create('Azure Blob Sync', this.settings.debug ? LogLevel.DEBUG : LogLevel.INFO);
-
+	async onLayoutReady() {
+		this.logger.debug('Layout ready');
 		await this.#setupSyncService();
 
 		this.addSettingTab(new SettingsTab(this.app, this));
-
 		this.registerEvent(this.app.vault.on('delete', this.#vaultDeleteEventHandler.bind(this)));
 		this.registerEvent(this.app.vault.on('rename', this.#vaultRenameEventHandler.bind(this)));
 		this.registerEvent(this.app.vault.on('modify', this.#vaultModifyEventHandler.bind(this)));
 		this.registerEvent(this.app.vault.on('create', this.#vaultCreateEventHandler.bind(this)));
-		this.addRibbonIcon('refresh-cw', 'Sync With Azure Blob Storage', this.doSync.bind(this));
+		this.addRibbonIcon('refresh-cw', 'Sync With Azure Blob Storage', this.doFullSync.bind(this));
 
 		this.addCommand({
 			id: 'sync',
 			name: 'Sync With Azure Blob Storage',
-			callback: this.doSync.bind(this),
+			callback: this.doFullSync.bind(this),
 		});
 
 		this.addCommand({
 			id: 'upload',
 			name: 'Upload All Files To Azure Blob Storage',
-			callback: this.#syncService.uploadAllFilesInVault.bind(this),
+			callback: () => {
+				this.syncService.uploadFromVault();
+			},
 		});
 
 		this.addCommand({
 			id: 'download',
 			name: 'Download All Files From Azure Blob Storage',
-			callback: this.#syncService.downloadAllFilesInContainer.bind(this),
+			callback: () => {
+				this.syncService.downloadToVault();
+			},
 		});
 	}
 
-	async doSync() {
-		this.#logger.debug('Started sync');
+	async onload() {
+		await this.loadSettings();
 
-		await this.#syncService.uploadAllFilesInVault();
-		await this.#syncService.downloadAllFilesInContainer();
+		this.logger = Logger.create('Azure Blob Sync', this.settings.debug ? LogLevel.DEBUG : LogLevel.INFO);
 
-		this.#logger.debug('Finished sync');
+		this.app.workspace.onLayoutReady(this.onLayoutReady.bind(this));
+	}
+
+	async doFullSync() {
+		await this.syncService.fullSync();
 	}
 
 	#vaultDeleteEventHandler(fileOrFolder: TAbstractFile) {
-		this.#syncService.deleteFile(fileOrFolder.path);
+		if (!isFile(fileOrFolder)) return;
+
+		this.syncService.deleteFile(fileOrFolder.path);
 	}
 
 	#vaultRenameEventHandler(fileOrFolder: TAbstractFile, oldPath: string) {
-		this.#syncService.renameFile(oldPath, fileOrFolder.path);
+		this.syncService.renameFile(oldPath, fileOrFolder.path);
 	}
 
 	async #vaultModifyEventHandler(fileOrFolder: TAbstractFile) {
 		const fileContent = await this.app.vault.cachedRead(fileOrFolder as TFile);
 
-		this.#syncService.uploadFile({
+		this.syncService.uploadFile({
 			fileName: fileOrFolder.path,
 			fileContent: new Blob([fileContent], { type: 'text/plain' }),
 			fileLength: (fileOrFolder as TFile).stat.size
@@ -128,7 +133,7 @@ export default class AzureBlobSync extends Plugin {
 
 		const fileContent = await this.app.vault.cachedRead(fileOrFolder as TFile);
 
-		this.#syncService.uploadFile({
+		this.syncService.uploadFile({
 			fileName: fileOrFolder.path,
 			fileContent: new Blob([fileContent], { type: 'text/plain' }),
 			fileLength: (fileOrFolder as TFile).stat.size
