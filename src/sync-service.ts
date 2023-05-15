@@ -50,7 +50,7 @@ export class SyncService {
 
       this.logger.info('[SyncService.initialize] SyncService initialized')
     } catch(err) {
-      this.logger.error('[SyncService.initialize] Error initializing SyncService', err);
+      this.logger.error('[SyncService.initialize] Error initializing SyncService', err.message, err);
     }
   }
 
@@ -67,7 +67,7 @@ export class SyncService {
 
       this.logger.debug('[SyncService.uploadFile] Done uploading file', fileName);
     } catch (err) {
-      this.logger.error('[SyncService.uploadFile] Error uploading file', err);
+      this.logger.error('[SyncService.uploadFile] Error uploading file', err.message, err);
     }
   }
 
@@ -85,7 +85,7 @@ export class SyncService {
 
       this.logger.debug('Done renaming file', oldFileName, 'to', newFileName);
     } catch (err) {
-      this.logger.error('Error renaming file', err);
+      this.logger.error('Error renaming file', err.message, err);
     }
   }
 
@@ -104,7 +104,7 @@ export class SyncService {
 
       this.logger.debug('[SyncService.createDirectoryTreeForFileInVault] Done creating directory tree for file', fileName);
     } catch (err) {
-      this.logger.error('[SyncService.createDirectoryTreeForFileInVault] Error creating directory tree for file', fileName, err);
+      this.logger.error('[SyncService.createDirectoryTreeForFileInVault] Error creating directory tree for file', fileName, err.message, err);
     }
   }
 
@@ -136,7 +136,7 @@ export class SyncService {
 
       return downloaded?.toString();
     } catch (err) {
-      this.logger.error('[SyncService.downloadFile] Error downloading file', err);
+      this.logger.error('[SyncService.downloadFile] Error downloading file', err.message, err);
     }
   }
 
@@ -152,7 +152,7 @@ export class SyncService {
 
       this.logger.debug('[SyncService.deleteFile] Done deleting file', fileName);
     } catch (err) {
-      this.logger.error('[SyncService.deleteFile] Error deleting file', err);
+      this.logger.error('[SyncService.deleteFile] Error deleting file', err.message, err);
     }
   }
 
@@ -180,7 +180,7 @@ export class SyncService {
         contentLength: properties.contentLength ?? 0,
       };
     } catch (err) {
-      this.logger.error('[SyncService.getBlobFileStats] Error getting file stats', err);
+      this.logger.error('[SyncService.getBlobFileStats] Error getting file stats', err.message, err);
 
       return {
         ...fileStats,
@@ -252,7 +252,7 @@ export class SyncService {
         }
       }
     } catch (err) {
-      this.logger.error('[SyncService.uploadFromVault] Error uploading files', err);
+      this.logger.error('[SyncService.uploadFromVault] Error uploading files', err.message, err);
     }
   }
 
@@ -283,7 +283,7 @@ export class SyncService {
 
         this.logger.debug('[SyncService.downloadToVault] Done deleting soft deleted file from vault', blobName);
       } catch (err) {
-        this.logger.error('[SyncService.deleteSoftDeletesFromVault] Error deleting soft deleted file from vault', blobName, err);
+        this.logger.error('[SyncService.deleteSoftDeletesFromVault] Error deleting soft deleted file from vault', blobName, err.message, err);
       }
     }
   }
@@ -324,7 +324,7 @@ export class SyncService {
 
         this.logger.debug('[SyncService.downloadToVault] Done downloading latest version of', blobName, 'from the container');
       } catch (err) {
-        this.logger.error('[SyncService.downloadToVault] Error downloading latest version of', blobName, 'from the container', err);
+        this.logger.error('[SyncService.downloadToVault] Error downloading latest version of', blobName, 'from the container', err.message, err);
       }
 
       const file = vaultFiles.find((file) => file.path === blobName);
@@ -350,7 +350,7 @@ export class SyncService {
 
           this.logger.debug('[SyncService.downloadToVault] Done downloading latest version of', blobName, 'from the container');
         } catch(err) {
-          this.logger.error('[SyncService.downloadToVault] Error downloading latest version of', blobName, 'from the container', err);
+          this.logger.error('[SyncService.downloadToVault] Error downloading latest version of', blobName, 'from the container', err.message, err);
         }
       }
     }
@@ -368,7 +368,7 @@ export class SyncService {
 
       this.logger.info('[SyncService.fullSync] Finished full sync');
     } catch (err) {
-      this.logger.error('[SyncService.fullSync] Error during full sync', err);
+      this.logger.error('[SyncService.fullSync] Error during full sync', err.message, err);
     }
   }
 }
