@@ -1,7 +1,7 @@
 {
 	"id": "azure-blob-sync",
 	"name": "Azure Blob Sync",
-	"version": "1.1.3",
+	"version": "1.2.0",
 	"minAppVersion": "0.15.0",
 	"description": "Sync notes to Azure Blob storage",
 	"author": "notmike101",
