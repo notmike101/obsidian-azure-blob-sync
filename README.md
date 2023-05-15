@@ -60,7 +60,8 @@ To configure these, log into the Azure portal and open your storage account sett
 | app:obsidian.md  | DELETE, GET, HEAD, MERGE, POST, OPTIONS, PUT | * | | 0 |
 | http<no-link>://localhost | DELETE, GET, HEAD, MERGE, POST, OPTIONS, PUT | * | | 0 |
 
-**The first one is for the desktop application, the second is for mobile application.**
+**The first one is for the desktop application, the second is for Android. I HAVE NOT FIGURED OUT THE CORS ORIGIN FOR IOS.**
+**If you need iOS support, replace all allowed origins with `*`.**
 
 **BE SURE TO SAVE**
 
