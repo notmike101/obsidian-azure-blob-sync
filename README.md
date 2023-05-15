@@ -7,7 +7,7 @@ This is an unofficial sync plugin for Obsidian that allows you to sync your vaul
 ## Prerequesites
 
 * An existing Azure Blob Storage account
-* A container in the storage account to store the files
+* A container in the storage account to store the files with soft delete **ENABLED**
 * A Shared Access Signature Token (SAS) for the storage account
 * A properly configured CORS policy for the storage account (See #cors-policy)
 
@@ -33,6 +33,12 @@ When first loading the application, you will need to configure all available set
 **NOTICE: YOU MUST PRESS THE SAVE BUTTON FOR THE SETTINGS TO BE SAVED. NEGLECTING TO DO THIS WILL RESULT IN YOUR CONFIGURATION BEING LOST.**
 
 This is done to prevent the plugin from saving and using invalid configuration data.
+
+## Soft delete!?
+
+Soft delete for blobs should be enabled to ensure that deleted files sync across clients. If you do not enable soft delete, you will need to manually delete files from the container AND every vault before it syncs again to ensure that the files are properly deleted.
+
+This is configured in your storage account in "Data protection". You can set the retention period for deleted blobs to whatever you want, but I recommend 7 days, but it really depends on how frequently you use your other synced devices.
 
 ## A Shared Access Token!? What the heck?
 
