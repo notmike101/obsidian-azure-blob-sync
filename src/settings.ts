@@ -169,13 +169,17 @@ export class SettingsTab extends PluginSettingTab {
       .addButton((button) => {
         return button
           .setButtonText('Save')
-          .setDisabled(true)
-          .onClick(async () => {
-            await this.#plugin.saveSettings();
-            this.#disableSaveButton();
-          });
+          .setDisabled(true);
       });
 
     this.#saveButton = saveButton.components[0] as ButtonComponent;
+    this.#saveButton.buttonEl.addEventListener('pointerdown', async (event) => {
+      const button = event.target as HTMLButtonElement;
+
+      if (button.disabled === false) {
+        this.#disableSaveButton();
+        await this.#plugin.saveSettings();
+      }
+    });
 	}
 }
