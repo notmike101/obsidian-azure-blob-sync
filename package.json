@@ -1,6 +1,6 @@
 {
 	"name": "azure-blob-sync-plugin",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "Allows sync of vault to Azure Blob Storage",
 	"main": "main.js",
 	"scripts": {
