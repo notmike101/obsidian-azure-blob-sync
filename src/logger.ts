@@ -24,19 +24,19 @@ export class Logger {
   error(...data: unknown[]) {
     if (this.logLevel > LogLevel.ERROR) return;
 
-    console.log(this.prefix, 'color: blue', 'color: default', '[ERROR]', ...data);
+    console.error(this.prefix, 'color: blue', 'color: default', '[ERROR]', ...data);
   }
 
   warn(...data: unknown[]) {
     if (this.logLevel > LogLevel.WARN) return;
 
-    console.log(this.prefix, 'color: blue', 'color: default', '[WARN]', ...data);
+    console.warn(this.prefix, 'color: blue', 'color: default', '[WARN]', ...data);
   }
 
   info(...data: unknown[]) {
     if (this.logLevel > LogLevel.INFO) return;
 
-    console.log(this.prefix, 'color: blue', 'color: default', '[INFO]', ...data);
+    console.info(this.prefix, 'color: blue', 'color: default', '[INFO]', ...data);
   }
 
   debug(...data: unknown[]) {
