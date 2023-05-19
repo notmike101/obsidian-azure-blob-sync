@@ -119,24 +119,27 @@ export default class AzureBlobSync extends Plugin {
 	}
 
 	async #vaultModifyEventHandler(fileOrFolder: TAbstractFile) {
-		const fileContent = await this.app.vault.cachedRead(fileOrFolder as TFile);
+		if (!(fileOrFolder instanceof TFile)) return;
+
+		const fileContent = await this.app.vault.cachedRead(fileOrFolder);
 
 		this.syncService.uploadFile({
 			fileName: fileOrFolder.path,
 			fileContent: new Blob([fileContent], { type: 'text/plain' }),
-			fileLength: (fileOrFolder as TFile).stat.size
+			fileLength: (fileOrFolder).stat.size
 		});
 	}
 
 	async #vaultCreateEventHandler(fileOrFolder: TAbstractFile) {
 		if (!isFile(fileOrFolder)) return;
+		if (!(fileOrFolder instanceof TFile)) return;
 
-		const fileContent = await this.app.vault.cachedRead(fileOrFolder as TFile);
+		const fileContent = await this.app.vault.cachedRead(fileOrFolder);
 
 		this.syncService.uploadFile({
 			fileName: fileOrFolder.path,
 			fileContent: new Blob([fileContent], { type: 'text/plain' }),
-			fileLength: (fileOrFolder as TFile).stat.size
+			fileLength: (fileOrFolder).stat.size
 		});
 	}
 
